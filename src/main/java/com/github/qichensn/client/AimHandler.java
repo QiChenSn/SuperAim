@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.qichensn.SuperAim;
+import com.github.qichensn.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
@@ -26,7 +27,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 import static com.github.qichensn.key.ModKeyMapping.AIM_HELP;
 
-@Mod(SuperAim.MODID)
 @EventBusSubscriber
 public class AimHandler {
     public static LivingEntity TARGET = null;
@@ -35,14 +35,15 @@ public class AimHandler {
     public static void aimBot(Pre event) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        if (player != null && minecraft.level != null && AIM_HELP.isDown() && (TARGET == null || TARGET.isAlive())) {
-            double SEARCH_RANGE = 128;
-            double FOV_ANGLE = 25.0;
-            double DISTANCE_WEIGHT = 0.9;
-            double DELTA = 0.3;
-            double SMOOTH_FACTOR = 0.3;
-            boolean AllowWallPenetration = false;
-            boolean AllowTargetSwitching = true;
+        if (player != null && minecraft.level != null && AIM_HELP.isDown()) {
+            double SEARCH_RANGE = ModConfig.getSearchRange();
+            double FOV_ANGLE = ModConfig.getFovAngle();
+            double DISTANCE_WEIGHT = ModConfig.getDistanceWeight();
+            double DELTA = ModConfig.getDelta();
+            double SMOOTH_FACTOR = ModConfig.getSmoothFactor();
+            boolean AllowWallPenetration = ModConfig.isAllowWallPenetration();
+            boolean AllowTargetSwitching = ModConfig.isAllowTargetSwitching();
+
             SearchTarget(player, SEARCH_RANGE, AllowWallPenetration, FOV_ANGLE, DISTANCE_WEIGHT, AllowTargetSwitching);
             LockTarget(player, (float)SMOOTH_FACTOR, DELTA);
         } else {
