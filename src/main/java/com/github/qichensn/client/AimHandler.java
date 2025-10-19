@@ -24,6 +24,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+import static com.github.qichensn.key.ModKeyMapping.AIM_HELP;
+
 @Mod(SuperAim.MODID)
 @EventBusSubscriber
 public class AimHandler {
@@ -33,7 +35,7 @@ public class AimHandler {
     public static void aimBot(Pre event) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        if (player != null && minecraft.level != null  && (TARGET == null || TARGET.isAlive())) {
+        if (player != null && minecraft.level != null && AIM_HELP.isDown() && (TARGET == null || TARGET.isAlive())) {
             double SEARCH_RANGE = 128;
             double FOV_ANGLE = 25.0;
             double DISTANCE_WEIGHT = 0.9;
