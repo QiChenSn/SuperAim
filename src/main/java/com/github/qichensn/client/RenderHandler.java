@@ -40,20 +40,101 @@ public class RenderHandler {
         double range = AimConfig.getSearchRange(); // 复用现有配置
         List<LivingEntity> entities = getNearbyEntities(player, level, range);
 
-        // 3. 渲染每个实体的标记
+        // 3. 批量渲染所有实体的标记
+        if (!entities.isEmpty()) {
+            renderEntitiesBatch(entities, player, crosshairPos, poseStack, camera);
+        }
+    }
+
+    /**
+     * 批量渲染所有实体标记
+     */
+    private static void renderEntitiesBatch(List<LivingEntity> entities, Player player,
+                                           Vec3 crosshairPos, PoseStack poseStack, Camera camera) {
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
+
+        // OpenGL 状态设置
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.disableDepthTest(); // 穿透方块显示
+        RenderSystem.lineWidth(2.0F);
+
+        // 矩阵变换
+        poseStack.pushPose();
+        Vec3 cameraPos = camera.getPosition();
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+        // 开始构建顶点数据
+        buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+
+        // 为每个实体添加顶点数据
         for (LivingEntity entity : entities) {
             if (entity == player) continue; // 跳过玩家自己
 
             Vec3 entityPos = entity.position();
+            float[] color = getEntityColor(entity);
 
-            // 颜色编码：玩家=白色，其他实体=黄色
-            float red = 1.0F;
-            float green = 1.0F;
-            float blue = (entity instanceof Player) ? 1.0F : 0.0F;
+            // 准星到实体的连线
+            addLineVertices(buffer, poseStack, crosshairPos, entityPos, color);
 
-            // 渲染连线和方框
-            renderLine(crosshairPos, entityPos, poseStack, camera, red, green, blue);
-            renderSquare(entityPos, poseStack, camera, red, green, blue);
+            // 方框的4条边
+            addSquareVertices(buffer, poseStack, entityPos, color);
+        }
+
+        // 一次性提交所有几何体
+        tessellator.end();
+
+        // 恢复状态
+        poseStack.popPose();
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
+    }
+
+    /**
+     * 获取实体颜色 - 玩家=白色，其他实体=黄色
+     */
+    private static float[] getEntityColor(LivingEntity entity) {
+        float red = 1.0F;
+        float green = 1.0F;
+        float blue = (entity instanceof Player) ? 1.0F : 0.0F;
+        return new float[]{red, green, blue};
+    }
+
+    /**
+     * 添加线条顶点数据
+     */
+    private static void addLineVertices(BufferBuilder buffer, PoseStack poseStack,
+                                        Vec3 start, Vec3 end, float[] color) {
+        buffer.vertex(poseStack.last().pose(), (float)start.x, (float)start.y, (float)start.z)
+                .color(color[0], color[1], color[2], 1.0F)
+                .endVertex();
+        buffer.vertex(poseStack.last().pose(), (float)end.x, (float)end.y, (float)end.z)
+                .color(color[0], color[1], color[2], 1.0F)
+                .endVertex();
+    }
+
+    /**
+     * 添加方框顶点数据
+     */
+    private static void addSquareVertices(BufferBuilder buffer, PoseStack poseStack,
+                                          Vec3 center, float[] color) {
+        double size = 1.0; // 半边长
+
+        // 四个角点
+        Vec3[] corners = {
+                new Vec3(center.x - size, center.y, center.z - size), // 西北
+                new Vec3(center.x + size, center.y, center.z - size), // 东北
+                new Vec3(center.x + size, center.y, center.z + size), // 东南
+                new Vec3(center.x - size, center.y, center.z + size)  // 西南
+        };
+
+        // 绘制4条边
+        for (int i = 0; i < 4; i++) {
+            Vec3 start = corners[i];
+            Vec3 end = corners[(i + 1) % 4];
+            addLineVertices(buffer, poseStack, start, end, color);
         }
     }
 
@@ -74,68 +155,4 @@ public class RenderHandler {
         );
     }
 
-    /**
-     * 渲染线条 - 从起点到终点
-     */
-    private static void renderLine(Vec3 start, Vec3 end, PoseStack poseStack,
-                                   Camera camera, float red, float green, float blue) {
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-
-        // OpenGL 状态设置
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.disableDepthTest(); // 穿透方块显示
-        RenderSystem.lineWidth(2.0F);
-
-        // 矩阵变换
-        poseStack.pushPose();
-        Vec3 cameraPos = camera.getPosition();
-        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-
-        // 构建顶点数据
-        buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-
-        // 起点
-        buffer.vertex(poseStack.last().pose(), (float)start.x, (float)start.y, (float)start.z)
-                .color(red, green, blue, 1.0F)
-                .endVertex();
-
-        // 终点
-        buffer.vertex(poseStack.last().pose(), (float)end.x, (float)end.y, (float)end.z)
-                .color(red, green, blue, 1.0F)
-                .endVertex();
-
-        // 提交渲染
-        tessellator.end();
-
-        // 恢复状态
-        poseStack.popPose();
-        RenderSystem.enableDepthTest();
-        RenderSystem.disableBlend();
     }
-
-    /**
-     * 渲染方框 - 在实体脚底绘制 2x2 正方形
-     */
-    private static void renderSquare(Vec3 center, PoseStack poseStack,
-                                     Camera camera, float red, float green, float blue) {
-        double size = 1.0; // 半边长
-
-        // 四个角点
-        Vec3[] corners = {
-                new Vec3(center.x - size, center.y, center.z - size), // 西北
-                new Vec3(center.x + size, center.y, center.z - size), // 东北
-                new Vec3(center.x + size, center.y, center.z + size), // 东南
-                new Vec3(center.x - size, center.y, center.z + size)  // 西南
-        };
-
-        // 绘制4条边
-        for (int i = 0; i < 4; i++) {
-            Vec3 start = corners[i];
-            Vec3 end = corners[(i + 1) % 4];
-            renderLine(start, end, poseStack, camera, red, green, blue);
-        }
-    }
-}
