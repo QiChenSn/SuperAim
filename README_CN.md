@@ -1,5 +1,7 @@
 # SuperAim Mod
 
+<img src="./img/icon.png" width="256" height="256" alt="Icon">
+
 一个Minecraft Forge模组，提供实体透视渲染和辅助瞄准功能。
 
 ## 🎯 主要功能

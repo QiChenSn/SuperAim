@@ -1,5 +1,7 @@
 # SuperAim Mod
 
+<img src="./img/icon.png" width="256" height="256" alt="Icon">
+
 A Minecraft Forge mod that provides entity X-ray rendering and aim assistance functionality.
 
 ## 🎯 Key Features
