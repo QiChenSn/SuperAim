@@ -5,9 +5,11 @@ import com.github.qichensn.client.RenderHandler;
 import com.github.qichensn.config.AimConfig;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,6 +20,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
+import static com.github.qichensn.client.AimModeAdapter.changeNextMode;
+import static com.github.qichensn.key.ModKeyMapping.CHANGE_MODE;
 import static com.github.qichensn.key.ModKeyMapping.TOGGLE_RENDERING;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -95,6 +99,17 @@ public class SuperAim
 
                 // 渲染浮动文本标签
                 EntityMarkerRenderer.renderEntityMarkers(event);
+            }
+        }
+
+        @SubscribeEvent
+        public static void onClientTick(TickEvent.ClientTickEvent event) {
+            if (event.phase == TickEvent.Phase.END) {
+                while (CHANGE_MODE.consumeClick()) {
+                    Minecraft minecraft = Minecraft.getInstance();
+                    LocalPlayer player = minecraft.player;
+                    changeNextMode(player);
+                }
             }
         }
     }

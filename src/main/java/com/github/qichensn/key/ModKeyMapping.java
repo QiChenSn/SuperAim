@@ -3,12 +3,17 @@ package com.github.qichensn.key;
 import com.github.qichensn.SuperAim;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
+
+import static com.github.qichensn.client.AimModeAdapter.changeNextMode;
 
 public class ModKeyMapping {
     public static KeyMapping AIM_HELP=new KeyMapping(
@@ -28,6 +33,14 @@ public class ModKeyMapping {
             "key.super_aim.name"         // 按键分类
     );
 
+    public static final KeyMapping CHANGE_MODE = new KeyMapping(
+            "key.super_aim.change_mode",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_L,
+            "key.super_aim.name"
+    );
+
     @Mod.EventBusSubscriber(
             modid = SuperAim.MODID,
             value = {Dist.CLIENT},
@@ -38,6 +51,7 @@ public class ModKeyMapping {
         public static void registerKeyMappingsEvent(RegisterKeyMappingsEvent registerKeyMappingsEvent) {
             registerKeyMappingsEvent.register(AIM_HELP);
             registerKeyMappingsEvent.register(TOGGLE_RENDERING);
+            registerKeyMappingsEvent.register(CHANGE_MODE);
         }
     }
 }

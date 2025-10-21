@@ -20,10 +20,14 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraftforge.client.event.RenderGuiEvent.Pre;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+import static com.github.qichensn.client.AimModeAdapter.changeNextMode;
+import static com.github.qichensn.client.AimModeAdapter.entityModeCheck;
 import static com.github.qichensn.key.ModKeyMapping.AIM_HELP;
+import static com.github.qichensn.key.ModKeyMapping.CHANGE_MODE;
 
 @EventBusSubscriber
 public class AimHandler {
@@ -93,6 +97,7 @@ public class AimHandler {
             Map<Double, LivingEntity> livingEntityMap = new HashMap<>();
 
             for (LivingEntity entity : entities) {
+                if(!entityModeCheck(entity))continue;
                 if (AllowWallPenetration || canSeeEntity(player, entity)) {
                     Vec3 entityPos = entity.getBoundingBox().getCenter();
                     Vec3 toEntity = entityPos.subtract(eyePos);

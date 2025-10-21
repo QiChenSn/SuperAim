@@ -18,6 +18,8 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import java.util.List;
 
+import static com.github.qichensn.client.AimModeAdapter.entityModeCheck;
+
 public class EntityMarkerRenderer {
 
     /**
@@ -48,6 +50,7 @@ public class EntityMarkerRenderer {
 
         // 为每个实体渲染标签
         for (LivingEntity entity : entities) {
+            if(!entityModeCheck(entity))continue;
             renderFloatingText(entity, poseStack, partialTick);
         }
     }

@@ -1,5 +1,9 @@
 {
   "key.super_aim.aim_help": "辅助瞄准",
   "key.super_aim.name": "SuperAim",
-  "key.super_aim.toggle_rendering": "实体渲染"
+  "key.super_aim.toggle_rendering": "实体渲染",
+  "message.super_aim.mode.monster": "切换至敌对生物模式",
+  "message.super_aim.mode.player": "切换至玩家模式",
+  "message.super_aim.mode.normal": "切换至默认模式",
+  "key.super_aim.change_mode": "切换模式"
 }

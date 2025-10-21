@@ -15,6 +15,8 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import java.util.List;
 
+import static com.github.qichensn.client.AimModeAdapter.entityModeCheck;
+
 public class RenderHandler {
 
     /**
@@ -71,7 +73,7 @@ public class RenderHandler {
 
         // 为每个实体添加顶点数据
         for (LivingEntity entity : entities) {
-            if (entity == player) continue; // 跳过玩家自己
+            if (entity == player || !entityModeCheck(entity)) continue; // 跳过玩家自己
 
             Vec3 entityPos = entity.position();
             float[] color = getEntityColor(entity);
