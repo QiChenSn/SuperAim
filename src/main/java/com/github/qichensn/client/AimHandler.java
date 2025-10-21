@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.qichensn.SuperAim;
-import com.github.qichensn.config.ModConfig;
+import com.github.qichensn.config.AimConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
@@ -22,7 +21,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraftforge.client.event.RenderGuiEvent.Pre;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 import static com.github.qichensn.key.ModKeyMapping.AIM_HELP;
@@ -36,13 +34,13 @@ public class AimHandler {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if (player != null && minecraft.level != null && AIM_HELP.isDown()) {
-            double SEARCH_RANGE = ModConfig.getSearchRange();
-            double FOV_ANGLE = ModConfig.getFovAngle();
-            double DISTANCE_WEIGHT = ModConfig.getDistanceWeight();
-            double DELTA = ModConfig.getDelta();
-            double SMOOTH_FACTOR = ModConfig.getSmoothFactor();
-            boolean AllowWallPenetration = ModConfig.isAllowWallPenetration();
-            boolean AllowTargetSwitching = ModConfig.isAllowTargetSwitching();
+            double SEARCH_RANGE = AimConfig.getSearchRange();
+            double FOV_ANGLE = AimConfig.getFovAngle();
+            double DISTANCE_WEIGHT = AimConfig.getDistanceWeight();
+            double DELTA = AimConfig.getDelta();
+            double SMOOTH_FACTOR = AimConfig.getSmoothFactor();
+            boolean AllowWallPenetration = AimConfig.isAllowWallPenetration();
+            boolean AllowTargetSwitching = AimConfig.isAllowTargetSwitching();
 
             SearchTarget(player, SEARCH_RANGE, AllowWallPenetration, FOV_ANGLE, DISTANCE_WEIGHT, AllowTargetSwitching);
             LockTarget(player, (float)SMOOTH_FACTOR, DELTA);

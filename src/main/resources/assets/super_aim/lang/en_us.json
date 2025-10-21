@@ -1,4 +1,5 @@
 {
   "key.super_aim.aim_help": "启用辅助瞄准",
-  "key.super_aim.name": "SuperAim"
+  "key.super_aim.name": "SuperAim",
+  "key.super_aim.toggle_rendering": "实体渲染"
 }

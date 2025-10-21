@@ -2,7 +2,7 @@ package com.github.qichensn.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
-public final class ModConfig {
+public final class AimConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<Integer> SEARCH_RANGE;
@@ -14,6 +14,16 @@ public final class ModConfig {
 
     public static final ForgeConfigSpec.DoubleValue SMOOTH_FACTOR;
     public static final ForgeConfigSpec.BooleanValue TARGET_GLOW_ENABLED;
+
+    // ========== 新增：渲染相关配置 ==========
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ENTITY_RENDERING;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_LINE_RENDERING;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_SQUARE_RENDERING;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_TEXT_RENDERING;
+    public static final ForgeConfigSpec.DoubleValue CROSSHAIR_DISTANCE;
+    public static final ForgeConfigSpec.DoubleValue SQUARE_SIZE;
+    public static final ForgeConfigSpec.DoubleValue TEXT_SCALE;
+    public static final ForgeConfigSpec.DoubleValue LINE_WIDTH;
 
     public static final ForgeConfigSpec SPEC;
 
@@ -70,6 +80,42 @@ public final class ModConfig {
                 .comment("Whether to enable glowing effect on locked targets.")
                 .define("targetGlowEnabled", true);
 
+        // ========== 新增：渲染配置初始化 ==========
+        BUILDER.push("Entity Rendering Settings");
+
+        ENABLE_ENTITY_RENDERING = BUILDER
+                .comment("启用实体渲染功能")
+                .define("enableEntityRendering", true);
+
+        ENABLE_LINE_RENDERING = BUILDER
+                .comment("启用连线渲染")
+                .define("enableLineRendering", true);
+
+        ENABLE_SQUARE_RENDERING = BUILDER
+                .comment("启用方框渲染")
+                .define("enableSquareRendering", true);
+
+        ENABLE_TEXT_RENDERING = BUILDER
+                .comment("启用文本标签渲染")
+                .define("enableTextRendering", true);
+
+        CROSSHAIR_DISTANCE = BUILDER
+                .comment("准星距离（格）")
+                .defineInRange("crosshairDistance", 5.0, 1.0, 20.0);
+
+        SQUARE_SIZE = BUILDER
+                .comment("方框半边长（格）")
+                .defineInRange("squareSize", 1.0, 0.5, 5.0);
+
+        TEXT_SCALE = BUILDER
+                .comment("文本缩放比例")
+                .defineInRange("textScale", 0.025, 0.01, 0.1);
+
+        LINE_WIDTH = BUILDER
+                .comment("线条宽度（像素）")
+                .defineInRange("lineWidth", 2.0, 1.0, 10.0);
+
+        BUILDER.pop();
         SPEC = BUILDER.build();
     }
 
@@ -104,5 +150,39 @@ public final class ModConfig {
 
     public static boolean isTargetGlowEnabled() {
         return TARGET_GLOW_ENABLED.get();
+    }
+
+    // ========== 新增：渲染配置 Getter ==========
+
+    public static boolean isEnableEntityRendering() {
+        return ENABLE_ENTITY_RENDERING.get();
+    }
+
+    public static boolean isEnableLineRendering() {
+        return ENABLE_LINE_RENDERING.get();
+    }
+
+    public static boolean isEnableSquareRendering() {
+        return ENABLE_SQUARE_RENDERING.get();
+    }
+
+    public static boolean isEnableTextRendering() {
+        return ENABLE_TEXT_RENDERING.get();
+    }
+
+    public static double getCrosshairDistance() {
+        return CROSSHAIR_DISTANCE.get();
+    }
+
+    public static double getSquareSize() {
+        return SQUARE_SIZE.get();
+    }
+
+    public static double getTextScale() {
+        return TEXT_SCALE.get();
+    }
+
+    public static double getLineWidth() {
+        return LINE_WIDTH.get();
     }
 }

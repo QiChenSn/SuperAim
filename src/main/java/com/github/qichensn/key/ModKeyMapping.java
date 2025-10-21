@@ -19,6 +19,15 @@ public class ModKeyMapping {
                 "key.super_aim.name"
     );
 
+    // ========== 新增：实体渲染开关按键 ==========
+    public static final KeyMapping TOGGLE_RENDERING = new KeyMapping(
+            "key.super_aim.toggle_rendering",  // 翻译键
+            KeyConflictContext.IN_GAME,        // 仅在游戏内有效
+            InputConstants.Type.KEYSYM,        // 键盘按键
+            GLFW.GLFW_KEY_V,                   // 默认 V 键
+            "key.super_aim.name"         // 按键分类
+    );
+
     @Mod.EventBusSubscriber(
             modid = SuperAim.MODID,
             value = {Dist.CLIENT},
@@ -28,6 +37,7 @@ public class ModKeyMapping {
         @SubscribeEvent
         public static void registerKeyMappingsEvent(RegisterKeyMappingsEvent registerKeyMappingsEvent) {
             registerKeyMappingsEvent.register(AIM_HELP);
+            registerKeyMappingsEvent.register(TOGGLE_RENDERING);
         }
     }
 }

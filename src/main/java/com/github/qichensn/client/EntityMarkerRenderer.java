@@ -1,0 +1,140 @@
+package com.github.qichensn.client;
+
+import com.github.qichensn.config.AimConfig;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+
+import java.util.List;
+
+public class EntityMarkerRenderer {
+
+    /**
+     * 渲染所有实体的浮动文本标签
+     */
+    public static void renderEntityMarkers(RenderLevelStageEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return;
+
+        Player player = mc.player;
+        Level level = mc.level;
+        PoseStack poseStack = event.getPoseStack();
+        float partialTick = event.getPartialTick();
+        double range = AimConfig.getSearchRange();
+
+        // 获取范围内的实体
+        Vec3 playerPos = player.position();
+        AABB searchArea = new AABB(
+                playerPos.subtract(range, range, range),
+                playerPos.add(range, range, range)
+        );
+
+        List<LivingEntity> entities = level.getEntitiesOfClass(
+                LivingEntity.class,
+                searchArea,
+                entity -> entity != player && entity.isAlive()
+        );
+
+        // 为每个实体渲染标签
+        for (LivingEntity entity : entities) {
+            renderFloatingText(entity, poseStack, partialTick);
+        }
+    }
+
+    /**
+     * 渲染单个实体的浮动文本
+     */
+    private static void renderFloatingText(LivingEntity entity, PoseStack poseStack, float partialTick) {
+        Minecraft mc = Minecraft.getInstance();
+        Camera camera = mc.gameRenderer.getMainCamera();
+        Vec3 cameraPos = camera.getPosition();
+
+        // 计算标签位置（实体头顶上方 0.5 格）
+        Vec3 labelPos = entity.position().add(0, entity.getBbHeight() + 0.5, 0);
+
+        // 构建显示文本
+        Component text = buildEntityLabel(entity);
+
+        // OpenGL 状态设置
+        RenderSystem.disableDepthTest(); // 穿透显示
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        // 矩阵变换序列
+        poseStack.pushPose();
+
+        // 1. 平移到 3D 世界位置（相对相机）
+        poseStack.translate(
+                labelPos.x - cameraPos.x,
+                labelPos.y - cameraPos.y,
+                labelPos.z - cameraPos.z
+        );
+
+        // 2. 广告牌效果：应用相机旋转（文本始终面向玩家）
+        poseStack.mulPose(camera.rotation());
+
+        // 3. 缩放文本
+        poseStack.scale(-0.025F, -0.025F, 0.025F); // 负值翻转坐标系
+
+        // 4. 文本居中对齐
+        Font font = mc.font;
+        int width = font.width(text);
+        poseStack.translate(-width / 2.0F, 0.0F, 0.0F);
+
+        // 5. 渲染文本
+        MultiBufferSource.BufferSource bufferSource =
+                MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+
+        font.drawInBatch(
+                text,                           // 文本内容
+                0.0F, 0.0F,                    // 起始坐标
+                0xFFFF00,                      // 颜色（黄色）
+                false,                         // 是否有阴影
+                poseStack.last().pose(),       // 变换矩阵
+                bufferSource,                  // 缓冲区源
+                Font.DisplayMode.SEE_THROUGH,  // 穿透显示模式
+                0,                             // 背景颜色（透明）
+                15728880                       // 光照值（全亮）
+        );
+
+        bufferSource.endBatch();
+
+        // 恢复状态
+        poseStack.popPose();
+        RenderSystem.enableDepthTest();
+    }
+
+    /**
+     * 构建实体标签文本
+     */
+    private static Component buildEntityLabel(LivingEntity entity) {
+        String name = entity.getName().getString();
+        int health = (int) entity.getHealth();
+        int armor = entity.getArmorValue();
+
+        if (entity instanceof Player) {
+            // 玩家显示更多信息
+            return Component.literal(String.format(
+                    "§f%s §7| §cHP: %d §7| §9Armor: %d",
+                    name, health, armor
+            ));
+        } else {
+            // 其他实体显示基本信息
+            return Component.literal(String.format(
+                    "§e%s §7| §cHP: %d",
+                    name, health
+            ));
+        }
+    }
+}

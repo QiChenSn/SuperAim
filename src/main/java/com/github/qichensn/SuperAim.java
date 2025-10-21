@@ -1,13 +1,16 @@
 package com.github.qichensn;
 
+import com.github.qichensn.client.EntityMarkerRenderer;
+import com.github.qichensn.client.RenderHandler;
+import com.github.qichensn.config.AimConfig;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -33,7 +36,7 @@ public class SuperAim
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
-        context.registerConfig(ModConfig.Type.CLIENT, com.github.qichensn.config.ModConfig.SPEC);
+        context.registerConfig(ModConfig.Type.CLIENT, AimConfig.SPEC);
 
 
         // Register ourselves for server and other game events we are interested in
@@ -64,6 +67,33 @@ public class SuperAim
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        }
+    }
+
+    // ========== 新增：客户端渲染事件订阅器 ==========
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+    public static class ClientRenderEvents {
+
+        /**
+         * 渲染实体标记（线条、方框、文本）
+         * 对应 Fabric 的 WorldRenderEvents.END
+         */
+        @SubscribeEvent
+        public static void onRenderLevel(RenderLevelStageEvent event) {
+            // 在实体渲染之后执行
+            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+
+                // 检查是否启用渲染功能（可通过按键或配置控制）
+                if (!AimConfig.isEnableEntityRendering()) {
+                    return; // 功能未启用，跳过渲染
+                }
+
+                // 渲染线框标记
+                RenderHandler.onRenderWorld(event);
+
+                // 渲染浮动文本标签
+                EntityMarkerRenderer.renderEntityMarkers(event);
+            }
         }
     }
 }
