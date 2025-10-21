@@ -49,7 +49,7 @@ public final class AimConfig {
                 .comment("计算目标优先级时的距离权重。数值越高越优先近距离目标。")
                 .comment("Weight applied to distance calculations when making decisions.")
                 .comment("Higher values prioritize closer targets.")
-                .defineInRange("distanceWeight", 0.9, 0.0, 1.0);
+                .defineInRange("distanceWeight", 0.2, 0.0, 1.0);
 
         DELTA = BUILDER
                 .comment("瞄准速度系数。数值越高锁定越快，但可能显得不自然。")
