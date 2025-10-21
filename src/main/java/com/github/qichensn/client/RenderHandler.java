@@ -79,8 +79,8 @@ public class RenderHandler {
             // 准星到实体的连线
             addLineVertices(buffer, poseStack, crosshairPos, entityPos, color);
 
-            // 方框的4条边
-            addSquareVertices(buffer, poseStack, entityPos, color);
+            // 实体的三维立方体框架
+            addCubeVertices(buffer, poseStack, entity, color);
         }
 
         // 一次性提交所有几何体
@@ -116,26 +116,42 @@ public class RenderHandler {
     }
 
     /**
-     * 添加方框顶点数据
+     * 添加立方体顶点数据
      */
-    private static void addSquareVertices(BufferBuilder buffer, PoseStack poseStack,
-                                          Vec3 center, float[] color) {
-        double size = 1.0; // 半边长
+    private static void addCubeVertices(BufferBuilder buffer, PoseStack poseStack,
+                                       LivingEntity entity, float[] color) {
+        // 获取实体的包围盒
+        AABB boundingBox = entity.getBoundingBox();
 
-        // 四个角点
+        // 计算包围盒的8个顶点
         Vec3[] corners = {
-                new Vec3(center.x - size, center.y, center.z - size), // 西北
-                new Vec3(center.x + size, center.y, center.z - size), // 东北
-                new Vec3(center.x + size, center.y, center.z + size), // 东南
-                new Vec3(center.x - size, center.y, center.z + size)  // 西南
+                new Vec3(boundingBox.minX, boundingBox.minY, boundingBox.minZ), // 0: 最小点
+                new Vec3(boundingBox.maxX, boundingBox.minY, boundingBox.minZ), // 1
+                new Vec3(boundingBox.maxX, boundingBox.minY, boundingBox.maxZ), // 2
+                new Vec3(boundingBox.minX, boundingBox.minY, boundingBox.maxZ), // 3
+                new Vec3(boundingBox.minX, boundingBox.maxY, boundingBox.minZ), // 4
+                new Vec3(boundingBox.maxX, boundingBox.maxY, boundingBox.minZ), // 5
+                new Vec3(boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ), // 6: 最大点
+                new Vec3(boundingBox.minX, boundingBox.maxY, boundingBox.maxZ)  // 7
         };
 
-        // 绘制4条边
-        for (int i = 0; i < 4; i++) {
-            Vec3 start = corners[i];
-            Vec3 end = corners[(i + 1) % 4];
-            addLineVertices(buffer, poseStack, start, end, color);
-        }
+        // 绘制底面的4条边
+        addLineVertices(buffer, poseStack, corners[0], corners[1], color);
+        addLineVertices(buffer, poseStack, corners[1], corners[2], color);
+        addLineVertices(buffer, poseStack, corners[2], corners[3], color);
+        addLineVertices(buffer, poseStack, corners[3], corners[0], color);
+
+        // 绘制顶面的4条边
+        addLineVertices(buffer, poseStack, corners[4], corners[5], color);
+        addLineVertices(buffer, poseStack, corners[5], corners[6], color);
+        addLineVertices(buffer, poseStack, corners[6], corners[7], color);
+        addLineVertices(buffer, poseStack, corners[7], corners[4], color);
+
+        // 绘制连接顶面和底面的4条边
+        addLineVertices(buffer, poseStack, corners[0], corners[4], color);
+        addLineVertices(buffer, poseStack, corners[1], corners[5], color);
+        addLineVertices(buffer, poseStack, corners[2], corners[6], color);
+        addLineVertices(buffer, poseStack, corners[3], corners[7], color);
     }
 
     /**
