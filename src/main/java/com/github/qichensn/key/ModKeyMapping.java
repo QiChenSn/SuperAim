@@ -16,8 +16,12 @@ import org.lwjgl.glfw.GLFW;
 
 import static com.github.qichensn.client.AimModeAdapter.changeNextMode;
 
+/**
+ * 模组按键映射类
+ * 定义所有自定义按键绑定
+ */
 public class ModKeyMapping {
-    public static KeyMapping AIM_HELP=new KeyMapping(
+    public static KeyMapping AIM_HELP = new KeyMapping(
                 "key.super_aim.aim_help",
                 KeyConflictContext.IN_GAME,
                 InputConstants.Type.KEYSYM,
@@ -25,22 +29,21 @@ public class ModKeyMapping {
                 "key.super_aim.name"
     );
 
-    // ========== 新增：实体渲染开关按键 ==========
     public static final KeyMapping TOGGLE_RENDERING = new KeyMapping(
-            "key.super_aim.toggle_rendering",  // 翻译键
-            KeyConflictContext.IN_GAME,        // 仅在游戏内有效
-            InputConstants.Type.KEYSYM,        // 键盘按键
-            GLFW.GLFW_KEY_V,                   // 默认 V 键
-            "key.super_aim.name"         // 按键分类
+            "key.super_aim.toggle_rendering",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            "key.super_aim.name"
     );
 
     public static final KeyMapping SET_RENDERING_ON = new KeyMapping(
-            "key.super_aim.set_rendering_on",  // 翻译键
-            KeyConflictContext.IN_GAME,// 仅在游戏内有效
+            "key.super_aim.set_rendering_on",
+            KeyConflictContext.IN_GAME,
             KeyModifier.ALT,
-            InputConstants.Type.KEYSYM,        // 键盘按键
-            GLFW.GLFW_KEY_V,                   // 默认 V 键
-            "key.super_aim.name"         // 按键分类
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            "key.super_aim.name"
     );
 
     public static final KeyMapping CHANGE_MODE = new KeyMapping(

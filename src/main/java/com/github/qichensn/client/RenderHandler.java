@@ -17,6 +17,10 @@ import java.util.List;
 
 import static com.github.qichensn.client.AimModeAdapter.entityModeCheck;
 
+/**
+ * 实体渲染处理器
+ * 负责渲染实体的线条和立方体框架
+ */
 public class RenderHandler {
 
     /**
@@ -33,16 +37,16 @@ public class RenderHandler {
         Camera camera = event.getCamera();
         float partialTick = event.getPartialTick();
 
-        // 1. 计算准星位置
+        // 计算准星位置
         Vec3 eyePos = player.getEyePosition(partialTick);
         Vec3 viewVec = player.getViewVector(1.0F);
-        Vec3 crosshairPos = eyePos.add(viewVec.scale(5.0)); // 视线前方5格
+        Vec3 crosshairPos = eyePos.add(viewVec.scale(AimConfig.getCrosshairDistance()));
 
-        // 2. AABB 实体检测
-        double range = AimConfig.getSearchRange(); // 复用现有配置
+        // AABB 实体检测
+        double range = AimConfig.getSearchRange();
         List<LivingEntity> entities = getNearbyEntities(player, level, range);
 
-        // 3. 批量渲染所有实体的标记
+        // 批量渲染所有实体的标记
         if (!entities.isEmpty()) {
             renderEntitiesBatch(entities, player, crosshairPos, poseStack, camera);
         }
@@ -60,8 +64,8 @@ public class RenderHandler {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.disableDepthTest(); // 穿透方块显示
-        RenderSystem.lineWidth(2.0F);
+        RenderSystem.disableDepthTest();
+        RenderSystem.lineWidth((float) AimConfig.getLineWidth());
 
         // 矩阵变换
         poseStack.pushPose();
@@ -73,7 +77,7 @@ public class RenderHandler {
 
         // 为每个实体添加顶点数据
         for (LivingEntity entity : entities) {
-            if (entity == player || !entityModeCheck(entity)) continue; // 跳过玩家自己
+            if (entity == player || !entityModeCheck(entity)) continue;
 
             Vec3 entityPos = entity.position();
             float[] color = getEntityColor(entity);
@@ -124,32 +128,37 @@ public class RenderHandler {
                                        LivingEntity entity, float[] color) {
         // 获取实体的包围盒
         AABB boundingBox = entity.getBoundingBox();
+        double squareSize = AimConfig.getSquareSize();
 
-        // 计算包围盒的8个顶点
+        // 计算包围盒的8个顶点（使用配置的方框大小）
+        Vec3 center = new Vec3(
+            (boundingBox.minX + boundingBox.maxX) / 2,
+            (boundingBox.minY + boundingBox.maxY) / 2,
+            (boundingBox.minZ + boundingBox.maxZ) / 2
+        );
+
         Vec3[] corners = {
-                new Vec3(boundingBox.minX, boundingBox.minY, boundingBox.minZ), // 0: 最小点
-                new Vec3(boundingBox.maxX, boundingBox.minY, boundingBox.minZ), // 1
-                new Vec3(boundingBox.maxX, boundingBox.minY, boundingBox.maxZ), // 2
-                new Vec3(boundingBox.minX, boundingBox.minY, boundingBox.maxZ), // 3
-                new Vec3(boundingBox.minX, boundingBox.maxY, boundingBox.minZ), // 4
-                new Vec3(boundingBox.maxX, boundingBox.maxY, boundingBox.minZ), // 5
-                new Vec3(boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ), // 6: 最大点
-                new Vec3(boundingBox.minX, boundingBox.maxY, boundingBox.maxZ)  // 7
+                new Vec3(center.x - squareSize, center.y - squareSize, center.z - squareSize), // 0: 最小点
+                new Vec3(center.x + squareSize, center.y - squareSize, center.z - squareSize), // 1
+                new Vec3(center.x + squareSize, center.y - squareSize, center.z + squareSize), // 2
+                new Vec3(center.x - squareSize, center.y - squareSize, center.z + squareSize), // 3
+                new Vec3(center.x - squareSize, center.y + squareSize, center.z - squareSize), // 4
+                new Vec3(center.x + squareSize, center.y + squareSize, center.z - squareSize), // 5
+                new Vec3(center.x + squareSize, center.y + squareSize, center.z + squareSize), // 6: 最大点
+                new Vec3(center.x - squareSize, center.y + squareSize, center.z + squareSize)  // 7
         };
 
-        // 绘制底面的4条边
+        // 绘制立方体的12条边
         addLineVertices(buffer, poseStack, corners[0], corners[1], color);
         addLineVertices(buffer, poseStack, corners[1], corners[2], color);
         addLineVertices(buffer, poseStack, corners[2], corners[3], color);
         addLineVertices(buffer, poseStack, corners[3], corners[0], color);
 
-        // 绘制顶面的4条边
         addLineVertices(buffer, poseStack, corners[4], corners[5], color);
         addLineVertices(buffer, poseStack, corners[5], corners[6], color);
         addLineVertices(buffer, poseStack, corners[6], corners[7], color);
         addLineVertices(buffer, poseStack, corners[7], corners[4], color);
 
-        // 绘制连接顶面和底面的4条边
         addLineVertices(buffer, poseStack, corners[0], corners[4], color);
         addLineVertices(buffer, poseStack, corners[1], corners[5], color);
         addLineVertices(buffer, poseStack, corners[2], corners[6], color);

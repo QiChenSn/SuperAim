@@ -20,6 +20,10 @@ import java.util.List;
 
 import static com.github.qichensn.client.AimModeAdapter.entityModeCheck;
 
+/**
+ * 实体标记渲染器
+ * 负责渲染实体的浮动文本标签
+ */
 public class EntityMarkerRenderer {
 
     /**
@@ -76,45 +80,45 @@ public class EntityMarkerRenderer {
         float scale = calculateTextScale(distance);
 
         // OpenGL 状态设置
-        RenderSystem.disableDepthTest(); // 穿透显示
+        RenderSystem.disableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         // 矩阵变换序列
         poseStack.pushPose();
 
-        // 1. 平移到 3D 世界位置（相对相机）
+        // 平移到 3D 世界位置（相对相机）
         poseStack.translate(
                 labelPos.x - cameraPos.x,
                 labelPos.y - cameraPos.y,
                 labelPos.z - cameraPos.z
         );
 
-        // 2. 广告牌效果：应用相机旋转（文本始终面向玩家）
+        // 广告牌效果：应用相机旋转（文本始终面向玩家）
         poseStack.mulPose(camera.rotation());
 
-        // 3. 动态缩放文本
-        poseStack.scale(-scale, -scale, scale); // 负值翻转坐标系
+        // 动态缩放文本
+        poseStack.scale(-scale, -scale, scale);
 
-        // 4. 文本居中对齐
+        // 文本居中对齐
         Font font = mc.font;
         int width = font.width(text);
         poseStack.translate(-width / 2.0F, 0.0F, 0.0F);
 
-        // 5. 渲染文本
+        // 渲染文本
         MultiBufferSource.BufferSource bufferSource =
                 MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
         font.drawInBatch(
-                text,                           // 文本内容
-                0.0F, 0.0F,                    // 起始坐标
-                0xFFFF00,                      // 颜色（黄色）
-                false,                         // 是否有阴影
-                poseStack.last().pose(),       // 变换矩阵
-                bufferSource,                  // 缓冲区源
-                Font.DisplayMode.SEE_THROUGH,  // 穿透显示模式
-                0,                             // 背景颜色（透明）
-                15728880                       // 光照值（全亮）
+                text,
+                0.0F, 0.0F,
+                0xFFFF00,
+                false,
+                poseStack.last().pose(),
+                bufferSource,
+                Font.DisplayMode.SEE_THROUGH,
+                0,
+                15728880
         );
 
         bufferSource.endBatch();
@@ -126,18 +130,10 @@ public class EntityMarkerRenderer {
 
     /**
      * 根据距离计算文本缩放比例
-     * @param distance 玩家与实体之间的距离
-     * @return 文本缩放比例
      */
     private static float calculateTextScale(double distance) {
-        // 基础缩放值
         float baseScale = 0.025F;
-
-        // 根据距离调整缩放比例，确保远距离也能看清
-        // 近距离时保持相对较小，远距离时适当放大
         float scale = (float) (baseScale * (1.0 + distance * 0.05));
-
-        // 设置合理的缩放范围，避免过小或过大
         return Math.max(0.01F, Math.min(scale, 0.1F));
     }
 
@@ -150,13 +146,11 @@ public class EntityMarkerRenderer {
         int armor = entity.getArmorValue();
 
         if (entity instanceof Player) {
-            // 玩家显示更多信息
             return Component.literal(String.format(
                     "§f%s §7| §cHP: %d §7| §9Armor: %d",
                     name, health, armor
             ));
         } else {
-            // 其他实体显示基本信息
             return Component.literal(String.format(
                     "§e%s §7| §cHP: %d",
                     name, health

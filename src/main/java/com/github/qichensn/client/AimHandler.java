@@ -29,6 +29,10 @@ import static com.github.qichensn.client.AimModeAdapter.entityModeCheck;
 import static com.github.qichensn.key.ModKeyMapping.AIM_HELP;
 import static com.github.qichensn.key.ModKeyMapping.CHANGE_MODE;
 
+/**
+ * 瞄准处理器
+ * 处理自动瞄准逻辑和目标选择
+ */
 @EventBusSubscriber
 public class AimHandler {
     public static LivingEntity TARGET = null;

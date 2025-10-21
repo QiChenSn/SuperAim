@@ -6,9 +6,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 
+/**
+ * 瞄准模式适配器
+ * 处理实体模式检查和模式切换逻辑
+ */
 public class AimModeAdapter {
-    public static AimMode currentMode=AimMode.NORMAL;
-    public static boolean useRenderingOn=false;
+    public static AimMode currentMode = AimMode.NORMAL;
+    public static boolean useRenderingOn = false;
 
     public static boolean entityModeCheck(LivingEntity entity) {
         return switch (currentMode) {
