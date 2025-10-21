@@ -18,6 +18,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
+import static com.github.qichensn.key.ModKeyMapping.TOGGLE_RENDERING;
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(SuperAim.MODID)
 public class SuperAim
@@ -81,7 +83,7 @@ public class SuperAim
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             // 在实体渲染之后执行
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES && TOGGLE_RENDERING.isDown()) {
 
                 // 检查是否启用渲染功能（可通过按键或配置控制）
                 if (!AimConfig.isEnableEntityRendering()) {
