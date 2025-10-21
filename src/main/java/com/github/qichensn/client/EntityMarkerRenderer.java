@@ -70,9 +70,6 @@ public class EntityMarkerRenderer {
         // 计算标签位置（实体头顶上方 0.5 格）
         Vec3 labelPos = entity.position().add(0, entity.getBbHeight() + 0.5, 0);
 
-        // 构建显示文本
-        Component text = buildEntityLabel(entity);
-
         // 计算玩家与实体之间的距离
         double distance = cameraPos.distanceTo(labelPos);
 
@@ -100,19 +97,53 @@ public class EntityMarkerRenderer {
         // 动态缩放文本
         poseStack.scale(-scale, -scale, scale);
 
-        // 文本居中对齐
+        // 渲染两行文本
         Font font = mc.font;
-        int width = font.width(text);
-        poseStack.translate(-width / 2.0F, 0.0F, 0.0F);
 
-        // 渲染文本
+        // 构建两个文本组件
+        Component nameText = Component.literal(entity.getName().getString());
+        Component statsText;
+
+        if (entity instanceof Player) {
+            int health = (int) entity.getHealth();
+            int armor = entity.getArmorValue();
+            statsText = Component.literal(String.format("§cHP: %d §7| §9Armor: %d", health, armor));
+        } else {
+            int health = (int) entity.getHealth();
+            statsText = Component.literal(String.format("§cHP: %d", health));
+        }
+
+        // 计算文本宽度
+        int nameWidth = font.width(nameText);
+        int statsWidth = font.width(statsText);
+
         MultiBufferSource.BufferSource bufferSource =
                 MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
+        // 渲染name（1.5倍大小）
+        poseStack.pushPose();
+        poseStack.scale(1.5f, 1.5f, 1.5f);
+        poseStack.translate(-nameWidth / 2.0f, -10.0f, 0.0f);
+
         font.drawInBatch(
-                text,
+                nameText,
                 0.0F, 0.0F,
-                0xFFFF00,
+                0xFFFFFF,  // 白色
+                false,
+                poseStack.last().pose(),
+                bufferSource,
+                Font.DisplayMode.SEE_THROUGH,
+                0,
+                15728880
+        );
+        poseStack.popPose();
+
+        poseStack.translate(-statsWidth / 2.0f, 5.0f, 0.0f);
+
+        font.drawInBatch(
+                statsText,
+                0.0F, 0.0F,
+                0xFFFF00,  // 黄色
                 false,
                 poseStack.last().pose(),
                 bufferSource,
@@ -135,26 +166,5 @@ public class EntityMarkerRenderer {
         float baseScale = 0.025F;
         float scale = (float) (baseScale * (1.0 + distance * 0.05));
         return Math.max(0.01F, Math.min(scale, 0.1F));
-    }
-
-    /**
-     * 构建实体标签文本
-     */
-    private static Component buildEntityLabel(LivingEntity entity) {
-        String name = entity.getName().getString();
-        int health = (int) entity.getHealth();
-        int armor = entity.getArmorValue();
-
-        if (entity instanceof Player) {
-            return Component.literal(String.format(
-                    "§f%s §7| §cHP: %d §7| §9Armor: %d",
-                    name, health, armor
-            ));
-        } else {
-            return Component.literal(String.format(
-                    "§e%s §7| §cHP: %d",
-                    name, health
-            ));
-        }
     }
 }
