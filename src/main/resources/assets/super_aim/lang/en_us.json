@@ -5,5 +5,8 @@
   "message.super_aim.mode.monster": "切换至敌对生物模式",
   "message.super_aim.mode.player": "切换至玩家模式",
   "message.super_aim.mode.normal": "切换至默认模式",
-  "key.super_aim.change_mode": "切换模式"
+  "key.super_aim.change_mode": "切换模式",
+  "key.super_aim.set_rendering_on": "启用持续实体渲染",
+  "message.super_aim.use_rendering": "已启用持续实体渲染",
+  "message.super_aim.stop_rendering": "已关闭持续实体渲染"
 }

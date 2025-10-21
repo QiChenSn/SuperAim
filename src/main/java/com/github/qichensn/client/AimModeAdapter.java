@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class AimModeAdapter {
     public static AimMode currentMode=AimMode.NORMAL;
+    public static boolean useRenderingOn=false;
 
     public static boolean entityModeCheck(LivingEntity entity) {
         return switch (currentMode) {

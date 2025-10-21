@@ -8,6 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -33,6 +34,15 @@ public class ModKeyMapping {
             "key.super_aim.name"         // 按键分类
     );
 
+    public static final KeyMapping SET_RENDERING_ON = new KeyMapping(
+            "key.super_aim.set_rendering_on",  // 翻译键
+            KeyConflictContext.IN_GAME,// 仅在游戏内有效
+            KeyModifier.ALT,
+            InputConstants.Type.KEYSYM,        // 键盘按键
+            GLFW.GLFW_KEY_V,                   // 默认 V 键
+            "key.super_aim.name"         // 按键分类
+    );
+
     public static final KeyMapping CHANGE_MODE = new KeyMapping(
             "key.super_aim.change_mode",
             KeyConflictContext.IN_GAME,
@@ -52,6 +62,7 @@ public class ModKeyMapping {
             registerKeyMappingsEvent.register(AIM_HELP);
             registerKeyMappingsEvent.register(TOGGLE_RENDERING);
             registerKeyMappingsEvent.register(CHANGE_MODE);
+            registerKeyMappingsEvent.register(SET_RENDERING_ON);
         }
     }
 }

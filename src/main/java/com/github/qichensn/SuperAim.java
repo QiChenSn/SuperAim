@@ -6,6 +6,7 @@ import com.github.qichensn.config.AimConfig;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -21,20 +22,18 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
 import static com.github.qichensn.client.AimModeAdapter.changeNextMode;
-import static com.github.qichensn.key.ModKeyMapping.CHANGE_MODE;
-import static com.github.qichensn.key.ModKeyMapping.TOGGLE_RENDERING;
+import static com.github.qichensn.client.AimModeAdapter.useRenderingOn;
+import static com.github.qichensn.key.ModKeyMapping.*;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(SuperAim.MODID)
-public class SuperAim
-{
+public class SuperAim {
     // Define mod id in a common place for everything to reference
     public static final String MODID = "super_aim";
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public SuperAim(FMLJavaModLoadingContext context)
-    {
+    public SuperAim(FMLJavaModLoadingContext context) {
         LOGGER.info("fuckfuckfuckfucxaifaiodhjoadjoasdoa");
 
         IEventBus modEventBus = context.getModEventBus();
@@ -49,27 +48,23 @@ public class SuperAim
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event)
-    {
+    private void commonSetup(final FMLCommonSetupEvent event) {
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event)
-    {
+    public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
         LOGGER.info("HELLO from server starting");
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
+    public static class ClientModEvents {
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
+        public static void onClientSetup(FMLClientSetupEvent event) {
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
@@ -87,7 +82,7 @@ public class SuperAim
         @SubscribeEvent
         public static void onRenderLevel(RenderLevelStageEvent event) {
             // 在实体渲染之后执行
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES && TOGGLE_RENDERING.isDown()) {
+            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES && (TOGGLE_RENDERING.isDown() || useRenderingOn)) {
 
                 // 检查是否启用渲染功能（可通过按键或配置控制）
                 if (!AimConfig.isEnableEntityRendering()) {
@@ -108,7 +103,18 @@ public class SuperAim
                 while (CHANGE_MODE.consumeClick()) {
                     Minecraft minecraft = Minecraft.getInstance();
                     LocalPlayer player = minecraft.player;
+                    if (player == null) return;
                     changeNextMode(player);
+                }
+                while (SET_RENDERING_ON.consumeClick()) {
+                    useRenderingOn = !useRenderingOn;
+                    Minecraft minecraft = Minecraft.getInstance();
+                    LocalPlayer player = minecraft.player;
+                    if (player == null) return;
+                    if (useRenderingOn)
+                        player.sendSystemMessage(Component.translatable("message.super_aim.use_rendering"));
+                    else
+                        player.sendSystemMessage(Component.translatable("message.super_aim.stop_rendering"));
                 }
             }
         }
